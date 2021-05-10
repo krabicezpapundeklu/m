@@ -1,0 +1,18 @@
+[package]
+name = "m"
+version = "0.1.0"
+authors = ["Jarda F <jarda@jarda.info>"]
+edition = "2018"
+
+[dependencies]
+regex = { version = "1", features = ["std"] }
+tokio = { version = "1", features = ["io-util", "macros", "process", "rt"] }
+which = "4.1"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["consoleapi", "processenv"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 'z'
