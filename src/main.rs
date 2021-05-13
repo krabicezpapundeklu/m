@@ -20,6 +20,7 @@ fn main() {
     let mvn = cmd(mvn_path, &mvn_args)
         .env("MAVEN_OPTS", "-Djansi.passthrough=true")
         .stderr_to_stdout()
+        .unchecked()
         .reader()
         .unwrap();
 
