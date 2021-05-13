@@ -1,10 +1,11 @@
 [package]
 name = "m"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Jarda F <jarda@jarda.info>"]
 edition = "2018"
 
 [dependencies]
+lazy_static = "1.4"
 regex = { version = "1", features = ["std"] }
 tokio = { version = "1", features = ["io-util", "macros", "process", "rt"] }
 which = "4.1"
