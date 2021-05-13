@@ -59,6 +59,7 @@ impl MvnOutputHandler {
         }
 
         if let Some(error) = self.match_error(&line) {
+            self.state = State::Normal;
             ansi_console::print_error(&error);
         } else if let Some(step) = self.match_step(&line) {
             self.state = State::Step;

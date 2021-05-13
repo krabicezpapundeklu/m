@@ -1,13 +1,13 @@
 [package]
 name = "m"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Jarda F <jarda@jarda.info>"]
 edition = "2018"
 
 [dependencies]
+duct = "0.13"
 lazy_static = "1.4"
-regex = { version = "1", features = ["std"] }
-tokio = { version = "1", features = ["io-util", "macros", "process", "rt"] }
+regex = { version = "1", default_features = false, features = ["std", "unicode-perl"] }
 which = "4.1"
 
 [target.'cfg(windows)'.dependencies]
