@@ -1,4 +1,5 @@
 use duct::cmd;
+use notify_rust::Notification;
 use std::io::{BufRead, BufReader};
 
 mod ansi_console;
@@ -19,17 +20,23 @@ fn main() {
 
     let mvn = cmd(mvn_path, &mvn_args)
         .env("MAVEN_OPTS", "-Djansi.passthrough=true")
-        .stderr_to_stdout()
-        .unchecked()
-        .reader()
-        .unwrap();
-
-    let reader = BufReader::new(mvn).split(b'\n');
+        .stderr_to_stdout();
 
     let quiet = m_args.iter().any(|arg| arg == QUIET_ARG);
     let mut output_handler = mvn_output_handler::MvnOutputHandler::new(quiet);
 
-    for line in reader {
-        output_handler.handle_line(&String::from_utf8_lossy(&line.unwrap()));
+    let mut build_summary = "Build succeeded 😎";
+    let lines = BufReader::new(mvn.reader().unwrap()).split(b'\n');
+
+    for line in lines {
+        match line {
+            Ok(line) => output_handler.handle_line(&String::from_utf8_lossy(&line)),
+            Err(_) => {
+                build_summary = "Build failed 😢";
+                break;
+            }
+        }
     }
+
+    Notification::new().summary(build_summary).show().unwrap();
 }
