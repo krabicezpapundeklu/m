@@ -1,18 +1,16 @@
 [package]
 name = "m"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["Jarda F <jarda@jarda.info>"]
 edition = "2018"
 
 [dependencies]
+crossterm = "0.19"
 duct = "0.13"
 lazy_static = "1.4"
 notify-rust = "4"
 regex = { version = "1", default_features = false, features = ["std", "unicode-perl"] }
 which = "4.1"
-
-[target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["consoleapi", "processenv"] }
 
 [profile.release]
 codegen-units = 1

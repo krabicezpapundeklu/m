@@ -2,7 +2,7 @@ use duct::cmd;
 use notify_rust::Notification;
 use std::io::{BufRead, BufReader};
 
-mod ansi_console;
+mod console;
 mod mvn_output_handler;
 
 #[macro_use]
@@ -11,7 +11,7 @@ extern crate lazy_static;
 const QUIET_ARG: &str = "--m-quiet";
 
 fn main() {
-    ansi_console::setup();
+    console::set_title("Running...");
 
     let mvn_path = which::which("mvn").expect("cannot find mvn");
 

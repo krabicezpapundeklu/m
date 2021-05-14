@@ -1,4 +1,4 @@
-use crate::ansi_console;
+use crate::console;
 use regex::Regex;
 
 lazy_static! {
@@ -30,11 +30,13 @@ impl MvnOutputHandler {
 
     pub fn handle_line(&mut self, line: &str) {
         if let Some((project, progress)) = self.match_project(&line) {
-            ansi_console::set_title(&format!("{} {}", progress, project));
+            let title = format!("{} {}", progress, project);
 
             if self.quiet {
-                println!("{} {}", progress, project);
+                self.print(&title, false);
             }
+
+            console::set_title(&title);
         }
 
         if !self.quiet {
@@ -42,31 +44,21 @@ impl MvnOutputHandler {
             return;
         }
 
-        match self.state {
-            State::Step => {
-                ansi_console::delete_last_line();
-                self.state = State::Normal;
-            }
-            State::SummaryFirstLine => {
-                self.state = State::Summary;
-                return;
-            }
-            State::Summary => {
-                println!("{}", line);
-                return;
-            }
-            _ => {}
+        if let State::Summary = self.state {
+            println!("{}", line);
+            return;
         }
 
         if let Some(error) = self.match_error(&line) {
-            self.state = State::Normal;
-            ansi_console::print_error(&error);
+            self.print(error, true);
         } else if let Some(step) = self.match_step(&line) {
+            self.print(&format!("  {}", step), false);
             self.state = State::Step;
-            println!("  {}", step);
         } else if self.match_summary(&line) {
+            self.print("", false);
             self.state = State::SummaryFirstLine;
-            println!();
+        } else if let State::SummaryFirstLine = self.state {
+            self.state = State::Summary;
         }
     }
 
@@ -90,5 +82,18 @@ impl MvnOutputHandler {
 
     fn match_summary(&self, line: &str) -> bool {
         SUMMARY_PATTERN.is_match(line)
+    }
+
+    fn print(&mut self, text: &str, is_error: bool) {
+        if let State::Step = self.state {
+            console::delete_last_line();
+            self.state = State::Normal;
+        }
+
+        if is_error {
+            console::print_error(text);
+        } else {
+            println!("{}", text);
+        }
     }
 }
