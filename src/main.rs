@@ -29,19 +29,18 @@ fn main() {
     let lines = BufReader::new(mvn.reader().unwrap()).split(b'\n');
 
     for line in lines {
-        match line {
-            Ok(line) => output_handler.handle_line(&String::from_utf8_lossy(&line)),
-            Err(_) => {
-                success = false;
-                break;
-            }
+        if let Ok(line) = line {
+            output_handler.handle_line(&String::from_utf8_lossy(&line))
+        } else {
+            success = false;
+            break;
         }
     }
 
     let build_summary = if success && output_handler.success() {
-        "Build succeeded 😎"
+        "Build succeeded \u{1f60e}"
     } else {
-        "Build failed 😢"
+        "Build failed \u{1f622}"
     };
 
     Notification::new().summary(build_summary).show().unwrap();

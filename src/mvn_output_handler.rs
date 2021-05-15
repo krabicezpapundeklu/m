@@ -33,7 +33,7 @@ impl MvnOutputHandler {
     }
 
     pub fn handle_line(&mut self, line: &str) {
-        if let Some((project, progress)) = self.match_project(&line) {
+        if let Some((project, progress)) = match_project(&line) {
             let title = format!("{} {}\n", progress, project);
 
             if self.quiet {
@@ -41,7 +41,8 @@ impl MvnOutputHandler {
             }
 
             console::set_title(&title);
-        } else if let Some(success) = self.match_status(&line) {
+        } else if let Some(success) = match_status(&line) {
+            #[allow(clippy::match_same_arms)]
             match (self.quiet, &self.state) {
                 (true, State::Summary) => {}
                 (true, _) => {
@@ -59,12 +60,12 @@ impl MvnOutputHandler {
             return;
         }
 
-        if let Some(error) = self.match_error(&line) {
+        if let Some(error) = match_error(&line) {
             self.print(&format!("{}\n", error), true);
-        } else if let Some(step) = self.match_step(&line) {
+        } else if let Some(step) = match_step(&line) {
             self.print(&format!("  {}\n", step), false);
             self.state = State::Step;
-        } else if self.match_summary(&line) {
+        } else if match_summary(&line) {
             self.print("\n", false);
             println!("{}", line);
             self.state = State::Summary;
@@ -73,37 +74,6 @@ impl MvnOutputHandler {
 
     pub fn success(&self) -> bool {
         self.success
-    }
-
-    fn match_error<'a>(&self, line: &'a str) -> Option<&'a str> {
-        ERROR_PATTERN
-            .captures(line)
-            .map(|c| c.get(1).unwrap().as_str())
-    }
-
-    fn match_project<'a>(&self, line: &'a str) -> Option<(&'a str, &'a str)> {
-        PROJECT_PATTERN.captures(line).map(|c| {
-            (
-                c.get(1).unwrap().as_str(),
-                c.get(2).map_or("[1/1]", |m| m.as_str()),
-            )
-        })
-    }
-
-    fn match_status(&self, line: &str) -> Option<bool> {
-        STATUS_PATTERN
-            .captures(line)
-            .map(|c| c.get(1).unwrap().as_str() == "SUCCESS")
-    }
-
-    fn match_step<'a>(&self, line: &'a str) -> Option<&'a str> {
-        STEP_PATTERN
-            .captures(line)
-            .map(|c| c.get(1).unwrap().as_str())
-    }
-
-    fn match_summary(&self, line: &str) -> bool {
-        SUMMARY_PATTERN.is_match(line)
     }
 
     fn print(&mut self, text: &str, is_error: bool) {
@@ -118,4 +88,35 @@ impl MvnOutputHandler {
             print!("{}", text);
         }
     }
+}
+
+fn match_error(line: &str) -> Option<&str> {
+    ERROR_PATTERN
+        .captures(line)
+        .map(|c| c.get(1).unwrap().as_str())
+}
+
+fn match_project(line: &str) -> Option<(&str, &str)> {
+    PROJECT_PATTERN.captures(line).map(|c| {
+        (
+            c.get(1).unwrap().as_str(),
+            c.get(2).map_or("[1/1]", |m| m.as_str()),
+        )
+    })
+}
+
+fn match_status(line: &str) -> Option<bool> {
+    STATUS_PATTERN
+        .captures(line)
+        .map(|c| c.get(1).unwrap().as_str() == "SUCCESS")
+}
+
+fn match_step(line: &str) -> Option<&str> {
+    STEP_PATTERN
+        .captures(line)
+        .map(|c| c.get(1).unwrap().as_str())
+}
+
+fn match_summary(line: &str) -> bool {
+    SUMMARY_PATTERN.is_match(line)
 }

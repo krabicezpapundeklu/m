@@ -8,17 +8,18 @@ use crossterm::{
 use std::io::stdout;
 
 pub fn delete_last_line() {
-    let _ = execute!(
+    execute!(
         stdout(),
         MoveToPreviousLine(0),
         Clear(ClearType::CurrentLine)
-    );
+    )
+    .unwrap();
 }
 
 pub fn print_error(error: &str) {
-    let _ = execute!(stdout(), PrintStyledContent(error.red()));
+    execute!(stdout(), PrintStyledContent(error.red())).unwrap();
 }
 
 pub fn set_title(title: &str) {
-    let _ = execute!(stdout(), SetTitle(title));
+    execute!(stdout(), SetTitle(title)).unwrap();
 }
