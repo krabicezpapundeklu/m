@@ -1,7 +1,8 @@
 use crossterm::{
-    cursor, execute,
-    style::{self, Color},
-    terminal::{self, ClearType},
+    cursor::MoveToPreviousLine,
+    execute,
+    style::{Colorize, PrintStyledContent},
+    terminal::{Clear, ClearType, SetTitle},
 };
 
 use std::io::stdout;
@@ -9,17 +10,15 @@ use std::io::stdout;
 pub fn delete_last_line() {
     let _ = execute!(
         stdout(),
-        cursor::MoveToPreviousLine(0),
-        terminal::Clear(ClearType::CurrentLine)
+        MoveToPreviousLine(0),
+        Clear(ClearType::CurrentLine)
     );
 }
 
 pub fn print_error(error: &str) {
-    let _ = execute!(stdout(), style::SetForegroundColor(Color::Red));
-    println!("{}", error);
-    let _ = execute!(stdout(), style::SetForegroundColor(Color::Reset));
+    let _ = execute!(stdout(), PrintStyledContent(error.red()));
 }
 
 pub fn set_title(title: &str) {
-    let _ = execute!(stdout(), terminal::SetTitle(title));
+    let _ = execute!(stdout(), SetTitle(title));
 }

@@ -30,7 +30,7 @@ impl MvnOutputHandler {
 
     pub fn handle_line(&mut self, line: &str) {
         if let Some((project, progress)) = self.match_project(&line) {
-            let title = format!("{} {}", progress, project);
+            let title = format!("{} {}\n", progress, project);
 
             if self.quiet {
                 self.print(&title, false);
@@ -50,12 +50,12 @@ impl MvnOutputHandler {
         }
 
         if let Some(error) = self.match_error(&line) {
-            self.print(error, true);
+            self.print(&format!("{}\n", error), true);
         } else if let Some(step) = self.match_step(&line) {
-            self.print(&format!("  {}", step), false);
+            self.print(&format!("  {}\n", step), false);
             self.state = State::Step;
         } else if self.match_summary(&line) {
-            self.print("", false);
+            self.print("\n", false);
             self.state = State::SummaryFirstLine;
         } else if let State::SummaryFirstLine = self.state {
             self.state = State::Summary;
@@ -93,7 +93,7 @@ impl MvnOutputHandler {
         if is_error {
             console::print_error(text);
         } else {
-            println!("{}", text);
+            print!("{}", text);
         }
     }
 }
