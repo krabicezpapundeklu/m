@@ -3,21 +3,24 @@ use regex::Regex;
 
 lazy_static! {
     static ref ERROR_PATTERN: Regex = Regex::new(r"\[.+?ERROR.+?\]\s*(.+)").unwrap();
-    static ref PROJECT_PATTERN: Regex = Regex::new(r"Building (.+?)\s+(\[\d+/\d+\])").unwrap();
+    static ref PROJECT_PATTERN: Regex =
+        Regex::new(r"\[.*?INFO.*?\].*Building (.+?)\s*(\[\d+/\d+\])?").unwrap();
     static ref STEP_PATTERN: Regex = Regex::new("--- (.+) @.+---").unwrap();
+    static ref STATUS_PATTERN: Regex =
+        Regex::new(r"\[.*?INFO.*?\].*BUILD (FAILURE|SUCCESS)").unwrap();
     static ref SUMMARY_PATTERN: Regex = Regex::new("Reactor Summary for .+:").unwrap();
 }
 
 enum State {
     Normal,
     Step,
-    SummaryFirstLine,
     Summary,
 }
 
 pub struct MvnOutputHandler {
     quiet: bool,
     state: State,
+    success: bool,
 }
 
 impl MvnOutputHandler {
@@ -25,6 +28,7 @@ impl MvnOutputHandler {
         MvnOutputHandler {
             quiet,
             state: State::Normal,
+            success: true,
         }
     }
 
@@ -37,14 +41,20 @@ impl MvnOutputHandler {
             }
 
             console::set_title(&title);
+        } else if let Some(success) = self.match_status(&line) {
+            match (self.quiet, &self.state) {
+                (true, State::Summary) => {}
+                (true, _) => {
+                    self.print("\n", false);
+                    self.state = State::Summary;
+                }
+                _ => {}
+            };
+
+            self.success = success;
         }
 
-        if !self.quiet {
-            println!("{}", line);
-            return;
-        }
-
-        if let State::Summary = self.state {
+        if let (false, _) | (_, State::Summary) = (self.quiet, &self.state) {
             println!("{}", line);
             return;
         }
@@ -56,10 +66,13 @@ impl MvnOutputHandler {
             self.state = State::Step;
         } else if self.match_summary(&line) {
             self.print("\n", false);
-            self.state = State::SummaryFirstLine;
-        } else if let State::SummaryFirstLine = self.state {
+            println!("{}", line);
             self.state = State::Summary;
         }
+    }
+
+    pub fn success(&self) -> bool {
+        self.success
     }
 
     fn match_error<'a>(&self, line: &'a str) -> Option<&'a str> {
@@ -69,9 +82,18 @@ impl MvnOutputHandler {
     }
 
     fn match_project<'a>(&self, line: &'a str) -> Option<(&'a str, &'a str)> {
-        PROJECT_PATTERN
+        PROJECT_PATTERN.captures(line).map(|c| {
+            (
+                c.get(1).unwrap().as_str(),
+                c.get(2).map_or("[1/1]", |m| m.as_str()),
+            )
+        })
+    }
+
+    fn match_status(&self, line: &str) -> Option<bool> {
+        STATUS_PATTERN
             .captures(line)
-            .map(|c| (c.get(1).unwrap().as_str(), c.get(2).unwrap().as_str()))
+            .map(|c| c.get(1).unwrap().as_str() == "SUCCESS")
     }
 
     fn match_step<'a>(&self, line: &'a str) -> Option<&'a str> {

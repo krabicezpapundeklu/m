@@ -25,18 +25,24 @@ fn main() {
     let quiet = m_args.iter().any(|arg| arg == QUIET_ARG);
     let mut output_handler = mvn_output_handler::MvnOutputHandler::new(quiet);
 
-    let mut build_summary = "Build succeeded 😎";
+    let mut success = true;
     let lines = BufReader::new(mvn.reader().unwrap()).split(b'\n');
 
     for line in lines {
         match line {
             Ok(line) => output_handler.handle_line(&String::from_utf8_lossy(&line)),
             Err(_) => {
-                build_summary = "Build failed 😢";
+                success = false;
                 break;
             }
         }
     }
+
+    let build_summary = if success && output_handler.success() {
+        "Build succeeded 😎"
+    } else {
+        "Build failed 😢"
+    };
 
     Notification::new().summary(build_summary).show().unwrap();
 }
