@@ -1,4 +1,4 @@
-# m
+# m [![Rust](https://github.com/krabicezpapundeklu/m/actions/workflows/rust.yml/badge.svg)](https://github.com/krabicezpapundeklu/m/actions/workflows/rust.yml)
 Maven wrapper to make waiting for long builds more comfortable.
 
 - shows build progress in console title
