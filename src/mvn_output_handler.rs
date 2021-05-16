@@ -42,20 +42,15 @@ impl MvnOutputHandler {
 
             console::set_title(&title);
         } else if let Some(success) = match_status(&line) {
-            #[allow(clippy::match_same_arms)]
-            match (self.quiet, &self.state) {
-                (true, State::Summary) => {}
-                (true, _) => {
-                    self.print("\n", false);
-                    self.state = State::Summary;
-                }
-                _ => {}
-            };
+            if self.quiet && !matches!(self.state, State::Summary) {
+                self.print("\n", false);
+                self.state = State::Summary;
+            }
 
             self.success = success;
         }
 
-        if let (false, _) | (_, State::Summary) = (self.quiet, &self.state) {
+        if !self.quiet || matches!(self.state, State::Summary) {
             println!("{}", line);
             return;
         }
