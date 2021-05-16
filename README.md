@@ -1,10 +1,14 @@
 # m
-Maven wrapper to make long builds more comfortable.
+Maven wrapper to make waiting for long builds more comfortable.
 
 - shows build progress in console title
-- makes output less cluttered
+- makes output less cluttered (when run with "--m-quiet" parameter)
+- shows notification when build finishes
 
 # Usage
-Run "m" instead of "mvn". This shows build progress in console title. Add "--m-quiet" parameter to make output less cluttered.
+Run "m" instead of "mvn".
 
 ![Demo](https://github.com/krabicezpapundeklu/m/blob/main/m.gif)
+
+# Downloads
+[Linux (x86_64-unknown-linux-musl)](https://github.com/krabicezpapundeklu/m/releases/latest/download/m)
