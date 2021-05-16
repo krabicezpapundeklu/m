@@ -50,5 +50,9 @@ fn main() {
         "Build failed \u{1f622}"
     };
 
-    Notification::new().summary(build_summary).show().unwrap();
+    Notification::new()
+        .summary(build_summary)
+        .body(output_handler.project_name().unwrap_or("<unknown>"))
+        .show()
+        .unwrap();
 }
