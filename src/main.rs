@@ -37,7 +37,7 @@ fn main() {
 
     for line in lines {
         if let Ok(line) = line {
-            output_handler.handle_line(&String::from_utf8_lossy(&line))
+            output_handler.handle_line(&String::from_utf8_lossy(&line));
         } else {
             success = false;
             break;

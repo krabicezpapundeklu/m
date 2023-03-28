@@ -4,7 +4,7 @@ use regex::Regex;
 lazy_static! {
     static ref ERROR_PATTERN: Regex = Regex::new(r"\[.+?ERROR.+?\]\s*(.+)").unwrap();
     static ref PROJECT_PATTERN: Regex =
-        Regex::new(r"\[.*?INFO.*?\].*Building (.+?)\s*(\[\d+/\d+\])?").unwrap();
+        Regex::new(r"\[.*?INFO.*?\].*Building (.+?)\s*(\[\d+/\d+\])?").unwrap();
     static ref STEP_PATTERN: Regex = Regex::new("--- (.+) @.+---").unwrap();
     static ref STATUS_PATTERN: Regex =
         Regex::new(r"\[.*?INFO.*?\].*BUILD (FAILURE|SUCCESS)").unwrap();
@@ -35,33 +35,33 @@ impl MvnOutputHandler {
     }
 
     pub fn handle_line(&mut self, line: &str) {
-        if let Some(error) = match_error(&line) {
-            self.print_if_quiet(&format!("{}\n", error), true);
-        } else if let Some(step) = match_step(&line) {
-            self.print_if_quiet(&format!("  {}\n", step), false);
+        if let Some(error) = match_error(line) {
+            self.print_if_quiet(&format!("{error}\n"), true);
+        } else if let Some(step) = match_step(line) {
+            self.print_if_quiet(&format!("  {step}\n"), false);
             self.state = State::Step;
-        } else if let Some((project, progress)) = match_project(&line) {
-            let title = format!("{} {}\n", progress, project);
+        } else if let Some((project, progress)) = match_project(line) {
+            let title = format!("{progress} {project}\n");
 
             self.print_if_quiet(&title, false);
             self.project_name = Some(project.to_string());
 
             console::set_title(&title);
-        } else if let Some(success) = match_status(&line) {
+        } else if let Some(success) = match_status(line) {
             if !matches!(self.state, State::Summary) {
                 self.print_if_quiet("\n", false);
             }
 
             self.state = State::Summary;
             self.success = success;
-        } else if let Some(project) = match_summary(&line) {
+        } else if let Some(project) = match_summary(line) {
             self.print_if_quiet("\n", false);
             self.state = State::Summary;
             self.project_name = Some(project.to_string());
         }
 
         if !self.quiet || matches!(self.state, State::Summary) {
-            println!("{}", line);
+            println!("{line}");
         }
     }
 
@@ -86,7 +86,7 @@ impl MvnOutputHandler {
         if is_error {
             console::print_error(text);
         } else {
-            print!("{}", text);
+            print!("{text}");
         }
     }
 }

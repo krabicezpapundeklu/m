@@ -1,7 +1,7 @@
 use crossterm::{
     cursor::MoveToPreviousLine,
     execute,
-    style::{Colorize, PrintStyledContent},
+    style::{PrintStyledContent, Stylize},
     terminal::{Clear, ClearType, SetTitle},
 };
 
